@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isaac Dinner - Galaga Edition</title>
+  <!-- More readable font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --tetris-blue: #3b9eff;
+      --tetris-yellow: #ffe93b;
+      --tetris-red: #ff3b3b;
+      --tetris-green: #3bff57;
+      --tetris-orange: #ffb13b;
+      --tetris-purple: #a13bff;
+      --tetris-cyan: #3bfff6;
+      --tetris-bg: #222831;
+      --tetris-border: #393e46;
+      --tetris-pink: #ff3bbf;
+      --tetris-white: #eeeeee;
+    }
+
+    body {
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--tetris-bg) 80%, #393e46 100%);
+      color: var(--tetris-white);
+      line-height: 1.7;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    /* Tetris block border effect */
+    .tetris-block {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin: 1px;
+      border: 3px solid var(--tetris-border);
+      box-shadow: 2px 2px 0 #0008;
+      border-radius: 2px;
+      vertical-align: middle;
+    }
+    .blue { background: var(--tetris-blue); }
+    .yellow { background: var(--tetris-yellow); }
+    .red { background: var(--tetris-red); }
+    .green { background: var(--tetris-green); }
+    .orange { background: var(--tetris-orange); }
+    .purple { background: var(--tetris-purple); }
+    .cyan { background: var(--tetris-cyan); }
+    .pink { background: var(--tetris-pink); }
+
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+      background: #181f2a;
+      border-bottom: 8px solid var(--tetris-blue);
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .tetris-title {
+      font-size: 2.2rem;
+      color: var(--tetris-yellow);
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 0 var(--tetris-blue), 4px 4px 0 #000a;
+      margin: 0.5rem 0 0.5rem 0;
+      display: inline-block;
+      background: #222831;
+      padding: 0.5rem 1.5rem;
+      border: 4px solid var(--tetris-red);
+      border-radius: 8px;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    }
+
+    header p {
+      font-size: 1rem;
+      color: var(--tetris-cyan);
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 1px 1px 0 #000a;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    }
+
+    .tetris-row {
+      margin: 0.5rem 0;
+    }
+
+    /* Galaga header animation */
+    .galaga-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 1.2rem;
+      height: 80px;
+      position: relative;
+      z-index: 3;
+      width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .galaga-enemy {
+      font-size: 2.5rem;
+      position: relative;
+      margin: 0 0.5rem;
+      z-index: 2;
+      opacity: 0.95;
+      transition: transform 0.3s;
+      display: inline-block;
+    }
+
+    /* Remove ship and bullet animation styles */
+    .galaga-ship, .galaga-bullet {
+      display: none !important;
+    }
+
+    @keyframes galaga-left-move {
+      0%, 80%, 100% { transform: scaleX(1) translateY(0); }
+      10%, 50% { transform: scaleX(1) translateY(10px) scale(1.08);}
+      40% { transform: scaleX(1) translateY(0);}
+      60% { transform: scaleX(1) translateY(5px) scale(1.04);}
+    }
+    @keyframes galaga-right-move {
+      0%, 80%, 100% { transform: scaleX(-1) translateY(0);}
+      10%, 50% { transform: scaleX(-1) translateY(10px) scale(1.08);}
+      40% { transform: scaleX(-1) translateY(0);}
+      60% { transform: scaleX(-1) translateY(5px) scale(1.04);}
+    }
+
+    /* Galaga/Investor scroller styles */
+    .galaga-scroller-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 48px;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+      /* For mobile, keep it above header content */
+    }
+    .galaga-scroller-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 48px;
+      width: 100vw;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    .galaga-scroller-item {
+      display: inline-block;
+      font-size: 2.2rem;
+      margin-right: 2.5rem;
+      vertical-align: middle;
+      filter: drop-shadow(2px 2px 0 #0008);
+      opacity: 0.93;
+      transition: transform 0.2s;
+      /* Optionally, add a little bounce on hover */
+      pointer-events: auto;
+      cursor: pointer;
+      user-select: none;
+    }
+    .galaga-scroller-item.investor {
+      font-size: 2rem;
+    }
+    .galaga-scroller-label {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--tetris-yellow);
+      text-align: center;
+      margin-top: -0.2em;
+      letter-spacing: 0.5px;
+      text-shadow: 1px 1px 0 #000a;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 740px;
+      margin: 2rem auto 0 auto;
+      padding: 1.5rem 1rem 3rem;
+      background: #232b39;
+      border-radius: 12px;
+      border: 4px solid var(--tetris-purple);
+      box-shadow: 0 8px 32px #000a;
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      margin-bottom: 2.5rem;
+      background: #181f2a;
+      border-radius: 8px;
+      border: 3px solid var(--tetris-cyan);
+      padding: 1.2rem 1rem 1.2rem 1.5rem;
+      box-shadow: 0 2px 8px #0006;
+    }
+
+    section h2 {
+      font-size: 1.1rem;
+      color: var(--tetris-yellow);
+      border-bottom: 3px dashed var(--tetris-pink);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 0 var(--tetris-blue);
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    }
+
+    .about-section {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-photo {
+      display: none;
+    }
+
+    /* Make about-section font match li (Contact & Relevant Links) */
+    .about-section p, .about-section a {
+      font-size: 1rem;
+      color: var(--tetris-white);
+      text-shadow: none;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      font-weight: normal;
+      line-height: 1.7;
+    }
+
+    .about-section a {
+      color: var(--tetris-cyan);
+      text-decoration: underline dotted;
+      transition: color 0.2s;
+    }
+    .about-section a:hover {
+      color: var(--tetris-yellow);
+      background: var(--tetris-blue);
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      color: var(--tetris-white);
+      font-weight: normal;
+      line-height: 1.7;
+      text-shadow: none;
+    }
+
+    a.button, .tetris-link {
+      display: inline-block;
+      margin-top: 1.1rem;
+      padding: 0.5rem 1.2rem;
+      background: var(--tetris-green);
+      color: #222;
+      border: 3px solid var(--tetris-blue);
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+      box-shadow: 2px 2px 0 var(--tetris-yellow);
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      margin-bottom: 0.5rem;
+    }
+    a.button:hover, .tetris-link:hover {
+      background: var(--tetris-yellow);
+      color: var(--tetris-red);
+      box-shadow: 4px 4px 0 var(--tetris-blue);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--tetris-yellow);
+      font-size: 0.8rem;
+      margin: 2rem 0 1rem 0;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 0 var(--tetris-blue);
+      background: #181f2a;
+      border-top: 6px solid var(--tetris-red);
+      padding: 1rem 0 0.5rem 0;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 800px) {
+      .about-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+      .about-photo {
+        margin-top: 0;
+      }
+      main {
+        padding: 1rem;
+      }
+      .galaga-row {
+        font-size: 1.5rem;
+        height: 50px;
+        width: 200px;
+      }
+      .galaga-enemy {
+        font-size: 1.7rem;
+      }
+      .galaga-ship {
+        font-size: 1.3rem;
+      }
+      .galaga-bullet {
+        font-size: 1.0rem;
+      }
+      .galaga-scroller-container {
+        height: 32px;
+      }
+      .galaga-scroller-item {
+        font-size: 1.3rem;
+      }
+      .galaga-scroller-item.investor {
+        font-size: 1.1rem;
+      }
+    }
+    @media (max-width: 600px) {
+      .tetris-title {
+        font-size: 1.1rem;
+        padding: 0.3rem 0.5rem;
+      }
+      header {
+        padding: 1.5rem 0.5rem 1rem;
+      }
+      main {
+        padding: 0.5rem;
+      }
+      section {
+        padding: 0.7rem 0.5rem 0.7rem 0.7rem;
+      }
+      .galaga-row {
+        font-size: 1.1rem;
+        height: 28px;
+        width: 120px;
+      }
+      .galaga-enemy {
+        font-size: 1.2rem;
+      }
+      .galaga-ship {
+        font-size: 0.9rem;
+      }
+      .galaga-bullet {
+        font-size: 0.7rem;
+      }
+      .galaga-scroller-container {
+        height: 24px;
+      }
+      .galaga-scroller-item {
+        font-size: 0.9rem;
+      }
+      .galaga-scroller-item.investor {
+        font-size: 0.8rem;
+      }
+    }
+
+    /* Fun: animated falling tetris blocks in header */
+    /* Removed animation for tetris blocks */
+    /* 
+    @keyframes fall {
+      0% { transform: translateY(-60px);}
+      100% { transform: translateY(0);}
+    }
+    .falling-block {
+      animation: fall 1.2s cubic-bezier(.4,2,.6,1) forwards;
+      opacity: 0.95;
+    }
+    */
+    .falling-block {
+      /* No animation, just normal block */
+      opacity: 0.95;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Galaga/Investor scroller: right-to-left animated row -->
+    <div class="galaga-scroller-container" aria-hidden="true">
+      <div class="galaga-scroller-track" id="galagaScrollerTrack">
+        <span class="galaga-scroller-item" title="Invader 1">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 2">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 3">👾<span class="galaga-scroller-label">Alien</span></span>
+        <span class="galaga-scroller-item" title="Invader 4">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 5">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 6">👾<span class="galaga-scroller-label">Alien</span></span>
+        <span class="galaga-scroller-item" title="Invader 7">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 8">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 9">👾<span class="galaga-scroller-label">Alien</span></span>
+        <!-- Duplicate for seamless infinite scroll -->
+        <span class="galaga-scroller-item" title="Invader 1">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 2">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 3">👾<span class="galaga-scroller-label">Alien</span></span>
+        <span class="galaga-scroller-item" title="Invader 4">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 5">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 6">👾<span class="galaga-scroller-label">Alien</span></span>
+        <span class="galaga-scroller-item" title="Invader 7">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 8">👾<span class="galaga-scroller-label">Invader</span></span>
+        <span class="galaga-scroller-item" title="Invader 9">👾<span class="galaga-scroller-label">Alien</span></span>
+      </div>
+      <script>
+        // Make the scroller track truly continuous
+        (function() {
+          const track = document.getElementById('galagaScrollerTrack');
+          let animationId;
+          let scrollAmount = 0;
+          let speed = 0.7; // px per frame, adjust for desired speed
+
+          // Calculate the width of the first half (original set)
+          function getSetWidth() {
+            let width = 0;
+            for (let i = 0; i < 10; i++) {
+              width += track.children[i].offsetWidth;
+            }
+            return width;
+          }
+
+          function step() {
+            const setWidth = getSetWidth();
+            scrollAmount += speed;
+            if (scrollAmount >= setWidth) {
+              scrollAmount = 0;
+            }
+            track.style.transform = `translateX(${-scrollAmount}px)`;
+            animationId = requestAnimationFrame(step);
+          }
+
+          // Wait for fonts and layout
+          window.addEventListener('load', () => {
+            // Set track to inline-flex for proper width calculation
+            track.style.display = 'inline-flex';
+            track.style.whiteSpace = 'nowrap';
+            track.parentElement.style.overflow = 'hidden';
+            step();
+          });
+        })();
+      </script>
+    </div>
+    <div></div>
+    <div class="tetris-row" aria-hidden="true">
+      <span class="tetris-block blue"></span>
+      <span class="tetris-block yellow"></span>
+      <span class="tetris-block red"></span>
+      <span class="tetris-block green"></span>
+      <span class="tetris-block orange"></span>
+      <span class="tetris-block purple"></span>
+      <span class="tetris-block cyan"></span>
+      <span class="tetris-block pink"></span>
+    </div>
+    <div class="tetris-title">ISAAC DINNER</div>
+    <p>Data Science | Growth | AI/ML | Indeed | Builders VC | Academic Research</p>
+    <div class="tetris-row" aria-hidden="true">
+      <span class="tetris-block cyan"></span>
+      <span class="tetris-block orange"></span>
+      <span class="tetris-block green"></span>
+      <span class="tetris-block yellow"></span>
+      <span class="tetris-block purple"></span>
+      <span class="tetris-block blue"></span>
+      <span class="tetris-block red"></span>
+      <span class="tetris-block pink"></span>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>About</h2>
+      <div class="about-section">
+        <!-- Removed about-photo for Galaga theme and readability -->
+        <div>
+          <p>
+            I am a data scientist and business academic with executive-level expertise at the intersection of applied statistics, machine learning (ML/AI), product, marketing and growth strategies. My work focuses on scaling impact in high-growth environments by combining rigorous statistical methodology with practical business application. I enjoy building tools and frameworks that drive measurable outcomes across customer acquisition, retention, and monetization. 
+          </p>
+          <p>
+            Right now, I spend most of my time with <a href="https://indeed.com">Indeed</a>, where I work on advertising measurement and other data science projects. I also work with startups through <a href="https://buildersvc.com">Builders VC</a> and have other independent projects.
+          </p>
+          <p>
+            I previously served on the business faculty at <a href="https://unc.edu">UNC-Chapel Hill's Business School</a> and <a href="https://www.ie.edu/en/home/">IE Business School</a> in Madrid. I also consult broadly on marketing effectiveness and on data science/machine learning related problems. In addition, I have worked at the <a href="https://www.nber.org">National Bureau of Economic Research</a>, <a href="https://www.airbnb.com">Airbnb</a>, and at <a href="https://en.wikipedia.org/wiki/Donaldson,_Lufkin_%26_Jenrette">Donaldson, Lufkin and Jenrette</a>.
+          </p>
+          <p>
+            My academic research has been published in the <i>Harvard Business Review, Journal of Marketing Research, Marketing Science, International Journal of Research in Marketing, Journal of International Business Studies</i>, and <i>Journal of Experimental Psychology: Applied.</i>
+          </p>
+          <p>
+            I received a PhD in marketing from <a href="https://business.columbia.edu/" target="_blank">Columbia Business School</a>, an MA in statistics from <a href="https://stat.columbia.edu/" target="_blank">Columbia’s Graduate School of Arts and Sciences</a>, and an SB in mathematics from the <a href="https://web.mit.edu/" target="_blank">Massachusetts Institute of Technology</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2>Contact &amp; Relevant Links</h2>
+      <ul>
+        <li><a class="tetris-link" href="mailto:isaac@isaacdinner.com">isaac@isaacdinner.com</a></li>
+        <li><a class="tetris-link" href="https://drive.google.com/file/d/1jcLl03O_zqRknS-EgU_oKrTqEDLf5TVs/view?usp=sharing">Academic CV</a></li>
+        <li><a class="tetris-link" href="https://www.linkedin.com/in/isaacdinner/" rel="me" target="_blank">LinkedIn</a></li>
+        <li><a class="tetris-link" href="https://scholar.google.com/citations?user=zMdKoF0AAAAJ&hl=en" rel="me" target="_blank">Google Scholar Page</a></li>
+        <li><a class="tetris-link" href="https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1127723" target="_blank">SSRN Page</a></li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <div class="tetris-row" aria-hidden="true">
+      <span class="tetris-block blue"></span>
+      <span class="tetris-block yellow"></span>
+      <span class="tetris-block red"></span>
+      <span class="tetris-block green"></span>
+      <span class="tetris-block orange"></span>
+      <span class="tetris-block purple"></span>
+      <span class="tetris-block cyan"></span>
+      <span class="tetris-block pink"></span>
+    </div>
+    &copy; 2024 Isaac Dinner. All rights reserved. <br>
+    <span style="font-size:0.7em;color:var(--tetris-cyan);">80s video game themed &#x1F3AE;</span>
+  </footer>
+  <script>
+    // Galaga/Investor scroller animation: right-to-left
+    (function() {
+      const track = document.getElementById('galagaScrollerTrack');
+      if (!track) return;
+      // Duplicate content for seamless loop
+      const original = track.innerHTML;
+      track.innerHTML = original + original;
+      let pos = 0;
+      let speed = 1.1; // px per frame, adjust for speed
+      let trackWidth = track.scrollWidth / 2;
+      function animate() {
+        pos -= speed;
+        if (-pos >= trackWidth) {
+          pos = 0;
+        }
+        track.style.transform = `translateX(${pos}px)`;
+        requestAnimationFrame(animate);
+      }
+      // Responsive: recalc width on resize
+      function recalcWidth() {
+        trackWidth = track.scrollWidth / 2;
+      }
+      window.addEventListener('resize', recalcWidth);
+      animate();
+    })();
+  </script>
+</body>
+</html>
