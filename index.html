@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Isaac Dinner</title>
+  <meta name="description" content="Isaac Dinner works across growth, marketing, and data science, leading applied AI/ML at Vivid Seats and drawing on a background in academic research.">
   <!-- More readable font from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -386,6 +387,62 @@
       /* No animation, just normal block */
       opacity: 0.95;
     }
+
+    .about-section { display: block; }
+
+    /* Compact contact links retained from the updated layout. */
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .contact-links li { margin: 0; }
+    .contact-links .tetris-link {
+      display: inline-block;
+      box-sizing: border-box;
+      max-width: 100%;
+      margin: 0;
+      padding: 0.5rem 0.85rem;
+      background: transparent;
+      color: #85e5ed;
+      border: 1px solid #5b8594;
+      border-radius: 4px;
+      box-shadow: none;
+      text-decoration: none;
+      font-weight: normal;
+      overflow-wrap: anywhere;
+    }
+    .contact-links .tetris-link:hover {
+      color: var(--tetris-yellow);
+      border-color: var(--tetris-yellow);
+      background: #111823;
+      box-shadow: none;
+    }
+    a:focus-visible {
+      outline: 2px solid var(--tetris-yellow);
+      outline-offset: 5px;
+    }
+    h1.tetris-title { font-weight: normal; }
+    @media (max-width: 600px) {
+      .contact-links { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* One animation controls the original alien row. */
+    .galaga-scroller-track {
+      display: flex;
+      width: max-content;
+      animation: galaga-scroll 36s linear infinite;
+    }
+    .galaga-scroller-item { flex-shrink: 0; }
+    @keyframes galaga-scroll {
+      to { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .galaga-scroller-track { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -413,43 +470,6 @@
         <span class="galaga-scroller-item" title="Invader 8">👾<span class="galaga-scroller-label">Invader</span></span>
         <span class="galaga-scroller-item" title="Invader 9">👾<span class="galaga-scroller-label">Alien</span></span>
       </div>
-      <script>
-        // Make the scroller track truly continuous
-        (function() {
-          const track = document.getElementById('galagaScrollerTrack');
-          let animationId;
-          let scrollAmount = 0;
-          let speed = 0.7; // px per frame, adjust for desired speed
-
-          // Calculate the width of the first half (original set)
-          function getSetWidth() {
-            let width = 0;
-            for (let i = 0; i < 10; i++) {
-              width += track.children[i].offsetWidth;
-            }
-            return width;
-          }
-
-          function step() {
-            const setWidth = getSetWidth();
-            scrollAmount += speed;
-            if (scrollAmount >= setWidth) {
-              scrollAmount = 0;
-            }
-            track.style.transform = `translateX(${-scrollAmount}px)`;
-            animationId = requestAnimationFrame(step);
-          }
-
-          // Wait for fonts and layout
-          window.addEventListener('load', () => {
-            // Set track to inline-flex for proper width calculation
-            track.style.display = 'inline-flex';
-            track.style.whiteSpace = 'nowrap';
-            track.parentElement.style.overflow = 'hidden';
-            step();
-          });
-        })();
-      </script>
     </div>
     <div></div>
     <div class="tetris-row" aria-hidden="true">
@@ -462,8 +482,8 @@
       <span class="tetris-block cyan"></span>
       <span class="tetris-block pink"></span>
     </div>
-    <div class="tetris-title">ISAAC DINNER</div>
-    <p>Data Science | Growth | AI/ML | Vivid Seats | Builders VC | Academic Research</p>
+    <h1 class="tetris-title">ISAAC DINNER</h1>
+    <p>Data Science | Growth | AI/ML | Academic Research</p>
     <div class="tetris-row" aria-hidden="true">
       <span class="tetris-block cyan"></span>
       <span class="tetris-block orange"></span>
@@ -479,34 +499,31 @@
     <section>
       <h2>About</h2>
       <div class="about-section">
-        <!-- Removed about-photo for Galaga theme and readability -->
-        <div>
-          <p>
-            I am a data scientist and business academic with executive-level expertise at the intersection of applied statistics, machine learning (ML/AI), product, marketing and growth. My work focuses on scaling impact in high-growth environments by combining rigorous statistical methodology with practical business application. I enjoy building tools and frameworks that drive measurable outcomes across customer acquisition, retention, and monetization. 
-          </p>
-          <p>
-            Right now, I spend most of my time with <a href="https://www.vividseats.com">Vivid Seats</a>, where I work on data science, machine learning and other growth related projects. I also work with startups through <a href="https://builders.vc">Builders VC</a> and have other independent projects.
-          </p>
-          <p>
-            I previously served on the business faculty at <a href="https://unc.edu">UNC-Chapel Hill's Business School</a> and <a href="https://www.ie.edu/business-school/">IE Business School</a> in Madrid. I also consult broadly on marketing effectiveness and on data science/machine learning related problems. Previously, I have worked at the <a href="https://www.nber.org">National Bureau of Economic Research</a>, <a href="https://www.airbnb.com">Airbnb</a>, <a href="https://www.indeed.com">Indeed</a> and at <a href="https://en.wikipedia.org/wiki/Donaldson,_Lufkin_%26_Jenrette">Donaldson, Lufkin and Jenrette</a>.
-          </p>
-          <p>
-            My academic research has been published in the <i>Harvard Business Review, Journal of Marketing Research, Marketing Science, International Journal of Research in Marketing, Journal of International Business Studies</i>, and <i>Journal of Experimental Psychology: Applied.</i>
-          </p>
-          <p>
-            I received a PhD in marketing from <a href="https://business.columbia.edu/" target="_blank">Columbia Business School</a>, an MA in statistics from <a href="https://stat.columbia.edu/" target="_blank">Columbia’s Graduate School of Arts and Sciences</a>, and an SB in mathematics from the <a href="https://web.mit.edu/" target="_blank">Massachusetts Institute of Technology</a>.
-          </p>
-        </div>
+        <p class="intro">
+          I build data products, machine learning systems, and the infrastructure that brings them into production. My work spans recommendation and ranking systems, personalization, experimentation, and causal inference, with a focus on solving growth problems. I combine hands-on modeling and engineering with technical leadership, taking ideas from early development through deployment at scale.
+        </p>
+        <p>
+          I’m VP of Applied AI/ML at <a href="https://www.vividseats.com">Vivid Seats</a>, building capabilities across personalization, marketing, and pricing. My work spans recommendation systems, ML infrastructure, and experimentation, taking ideas from early development through deployment to improve customer experience and drive growth.
+        </p>
+        <p>
+          Previously, I led analytics for growth and brand marketing at <a href="https://www.indeed.com">Indeed</a> and worked in growth data science at <a href="https://www.airbnb.com">Airbnb</a>. I also advise startups as an operating partner with <a href="https://builders.vc">Builders VC</a>.
+        </p>
+        <p>
+          Earlier in my career, I served on the business faculty at <a href="https://unc.edu">UNC-Chapel Hill</a> and <a href="https://www.ie.edu/business-school/">IE Business School</a> in Madrid. My research has appeared in <i>Harvard Business Review</i>, <i>Journal of Marketing Research</i>, <i>Marketing Science</i>, <i>International Journal of Research in Marketing</i>, <i>Journal of International Business Studies</i>, and <i>Journal of Experimental Psychology: Applied</i>.
+        </p>
+        <p>
+          I hold a PhD in marketing and an MA in statistics from <a href="https://www.columbia.edu/">Columbia University</a>, and an SB in mathematics from <a href="https://web.mit.edu/">MIT</a>.
+        </p>
       </div>
     </section>
     <section>
-      <h2>Contact &amp; Relevant Links</h2>
-      <ul>
+      <h2>Contact &amp; Links</h2>
+      <ul class="contact-links">
         <li><a class="tetris-link" href="mailto:isaac@isaacdinner.com">isaac@isaacdinner.com</a></li>
         <li><a class="tetris-link" href="https://drive.google.com/file/d/1SWpajcZJ6CKOKufkXsvEUuhkLS5KDFPV/view?usp=sharing">Academic CV</a></li>
-        <li><a class="tetris-link" href="https://www.linkedin.com/in/isaacdinner/" rel="me" target="_blank">LinkedIn</a></li>
-        <li><a class="tetris-link" href="https://scholar.google.com/citations?user=zMdKoF0AAAAJ&hl=en" rel="me" target="_blank">Google Scholar Page</a></li>
-        <li><a class="tetris-link" href="https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1127723" target="_blank">SSRN Page</a></li>
+        <li><a class="tetris-link" href="https://www.linkedin.com/in/isaacdinner/" rel="me noopener noreferrer" target="_blank">LinkedIn</a></li>
+        <li><a class="tetris-link" href="https://scholar.google.com/citations?user=zMdKoF0AAAAJ&hl=en" rel="me noopener noreferrer" target="_blank">Google Scholar</a></li>
+        <li><a class="tetris-link" href="https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=1127723" target="_blank" rel="noopener noreferrer">SSRN</a></li>
       </ul>
     </section>
   </main>
@@ -521,36 +538,9 @@
       <span class="tetris-block cyan"></span>
       <span class="tetris-block pink"></span>
     </div>
-    &copy; 2025 Isaac Dinner. All rights reserved. <br>
-    <span style="font-size:0.7em;color:var(--tetris-cyan);">80s video game themed &#x1F3AE;</span>
+    &copy; 2026 Isaac Dinner. All rights reserved. <br>
+    <span style="font-size:0.7em;color:var(--tetris-cyan);">beep boop beep &#x1F3AE;</span>
   </footer>
-  <script>
-    // Galaga/Investor scroller animation: right-to-left
-    (function() {
-      const track = document.getElementById('galagaScrollerTrack');
-      if (!track) return;
-      // Duplicate content for seamless loop
-      const original = track.innerHTML;
-      track.innerHTML = original + original;
-      let pos = 0;
-      let speed = 1.1; // px per frame, adjust for speed
-      let trackWidth = track.scrollWidth / 2;
-      function animate() {
-        pos -= speed;
-        if (-pos >= trackWidth) {
-          pos = 0;
-        }
-        track.style.transform = `translateX(${pos}px)`;
-        requestAnimationFrame(animate);
-      }
-      // Responsive: recalc width on resize
-      function recalcWidth() {
-        trackWidth = track.scrollWidth / 2;
-      }
-      window.addEventListener('resize', recalcWidth);
-      animate();
-    })();
-  </script>
 
 <!-- Default Statcounter code for Isaacdinner.com
 http://www.isaacdinner.com -->
